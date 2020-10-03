@@ -16,6 +16,20 @@ struct array {
     public:
         static T aoob; 
         static const T aoob;
+        // Accessor methods
+        inline unsigned numdim() const {
+            return num_dimensions;
+        }
+        inline unsigned dimsize(unsigned x) const {
+            return dimensions[x];
+        }
+        // Get data from array 
+        inline T& operator[] (unsigned x) {
+            return data[x];
+        }
+        inline const T& operator[] (unsigned x) const {
+            return data[x];
+        }
         // No argument constructor
         array() {
             num_dimensions = 0;
@@ -84,6 +98,10 @@ struct array {
         // Return size in bytes of the contained data
         inline int datasize() const {
             return data_size*sizeof(T);
+        }
+        // Returns the number of elements contained
+        inline int size() const {
+            return data_size;
         }
 };
 
