@@ -5,7 +5,8 @@
 
 int main() {
     Array<double> arr1 = Array<double>(3,3,3,3);
-    arr1(2,2,2) = 3.2341;
+    arr1.ones();
+    std::cout << *arr1.shape << std::endl;
     arr1.~Array();
     return 0;
 }

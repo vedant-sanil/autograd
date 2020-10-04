@@ -17,6 +17,7 @@ struct Array {
         T* data; // stores data
 
     public:
+        unsigned int* shape;
         static T aoob; 
         //static const T aoob;
         // Accessor methods
@@ -27,14 +28,12 @@ struct Array {
             return dimensions[x];
         }
         // Get data from array 
-        ///*
         inline T& operator[] (unsigned x) {
             return data[x];
         }
         inline const T& operator[] (unsigned x) const {
             return data[x];
         }
-        //*/
         // No argument constructor
         Array() {
             num_dimensions = 0;
@@ -70,9 +69,9 @@ struct Array {
                 one_d_dimensions[ndim-1] = dimensions[ndim-1];
                 for (int a=ndim-2; a>=0; --a) {
                     one_d_dimensions[a] = dimensions[a+1] * dimensions[a];
-                    std::cout << "Dimension is : " << one_d_dimensions[a] << std::endl;
                 }
             }
+            shape = dimensions;
         }
         // Destructor
         ~Array() {
@@ -140,10 +139,11 @@ struct Array {
         }
         // Fills the array with 1
         inline void ones() const {
-            for (int i=0; i<size; ++i) {
+            for (int i=0; i<data_size; ++i) {
                 data[i] = T (1);
             }
         }
+        // Return the shape of the array
 };
 
 #endif
