@@ -13,6 +13,7 @@ struct Array {
         unsigned int num_dimensions; // number of dimensions
         unsigned int data_size; // size of data
         unsigned int* dimensions; // array of dimension sizes
+        unsigned int* one_d_dimensions; // array of dimensions for one D array
         T* data; // stores data
 
     public:
@@ -39,6 +40,7 @@ struct Array {
             num_dimensions = 0;
             data_size = 0;
             dimensions = NULL;
+            one_d_dimensions = NULL;
             data = NULL;
         }
         // Constructor for the array
@@ -47,10 +49,12 @@ struct Array {
             num_dimensions = ndim;
             if (ndim==0) {
                 dimensions = NULL;
+                one_d_dimensions = NULL;
                 data = NULL;
                 data_size = 0;
             } else {
                 dimensions = new unsigned int[ndim];
+                one_d_dimensions = new unsigned int[ndim];
                 va_list args;
                 va_start (args, ndim);
                 unsigned size=1;
@@ -61,6 +65,13 @@ struct Array {
                 data = new T[size];
                 data_size = size;
                 va_end(args);
+
+                // Set correct multiplicative dimensions for flattening array
+                one_d_dimensions[ndim-1] = dimensions[ndim-1];
+                for (int a=ndim-2; a>=0; --a) {
+                    one_d_dimensions[a] = dimensions[a+1] * dimensions[a];
+                    std::cout << "Dimension is : " << one_d_dimensions[a] << std::endl;
+                }
             }
         }
         // Destructor
@@ -71,46 +82,46 @@ struct Array {
         // Return a reference to the element at the current position
         // Operator () (x,y,z,....)
         T& operator()(unsigned x, ...) {
-            unsigned int index=x, pos=x, dim=1, a=0;
+            unsigned int index=x, pos=0, dim=1, a=0;
             va_list args;
             va_start(args, x);
             for (;a<num_dimensions; ++a) {
-                if ((index=va_arg(args, unsigned int)) > dimensions[a] && (a != 0)){
+                if ((a != 0) && (index=va_arg(args, unsigned int)) > dimensions[a]-1 || (x > dimensions[0]-1)) {
+                    std::cerr << "Out of Range error" << std::endl;
+                    exit(EXIT_FAILURE); // Change this to throw catch statements
+                }
+                if (a == num_dimensions-1) {
+                    break;
+                }
+                dim = one_d_dimensions[a+1];
+                pos += dim * index;
+            }
+            pos += index;
+            va_end(args);
+            return data[pos];
+        }
+        // Const correctness, TODO: Research on it
+        const T& operator()(unsigned x, ...) const {
+            unsigned int index=x, pos=0, dim=1, a=0;
+            va_list args;
+            va_start(args, x);
+            for (;a<num_dimensions; ++a) {
+                if ((a != 0) && (index=va_arg(args, unsigned int)) > dimensions[a]) {
                     std::cerr << "Out of Range error" << std::endl;
                     exit(EXIT_FAILURE);
                 }
                 if (a == num_dimensions-1) {
                     break;
                 }
-                dim = dimensions[a];
+                dim = one_d_dimensions[a+1];
                 pos += dim * index;
             }
-            //index=va_arg(args, unsigned int);
-            std::cout << "Index is : " << index << std::endl;
             pos += index;
-            std::cout << "Pos is : " << pos << std::endl;
-            //pos = dim + index;
             va_end(args);
             if (pos >= data_size) {
                 std::cerr << "Out of Range error" << std::endl;
                 exit(EXIT_FAILURE);
             }
-            return data[pos];
-        }
-        // Const correctness, TODO: Research on it
-        const T& operator()(unsigned x, ...) const {
-            unsigned index, pos=x, dim=1, a=0;
-            va_list args;
-            va_start(args, x);
-            for (;a<num_dimensions; ++a) {
-                if ((index=va_arg(args, unsigned)) > dimensions[a]){
-                    std::cerr << "Out of Range error" << std::endl;
-                    exit(EXIT_FAILURE);
-                }
-                dim *= dimensions[a];
-                pos += index*dim;
-            }
-            va_end(args);
             return data[pos];
         }
         // Return size in bytes of the contained data
