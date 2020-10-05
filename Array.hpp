@@ -6,6 +6,13 @@
 #include <iostream>
 #include <exception>
 
+// Forward declaration
+template <typename T>
+struct Array;
+
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const Array<T> array);
+
 template<typename T>
 struct Array {
     // Struct stores my data
@@ -26,13 +33,6 @@ struct Array {
         }
         inline unsigned dimsize(unsigned x) const {
             return dimensions[x];
-        }
-        // Get data from array 
-        inline T& operator[] (unsigned x) {
-            return data[x];
-        }
-        inline const T& operator[] (unsigned x) const {
-            return data[x];
         }
         // No argument constructor
         Array() {
@@ -143,7 +143,16 @@ struct Array {
                 data[i] = T (1);
             }
         }
-        // Return the shape of the array
+        // Print out array
+        friend std::ostream& operator<<<T>(std::ostream& out, const Array array);
+};
+
+template <typename T>
+std::ostream& operator<< (std::ostream &out, const Array<T> array) {
+    for (int i=0; i<array.numdim(); ++i) {
+        out << i << std::endl;
+    }
+    return out;
 };
 
 #endif
