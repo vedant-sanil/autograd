@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <iostream>
 #include <exception>
+#include <random>
 
 // Forward declaration
 template <typename T>
@@ -33,6 +34,9 @@ struct Array {
         }
         inline unsigned dimsize(unsigned x) const {
             return dimensions[x];
+        }
+        inline T* item() const {
+            return data;
         }
         // No argument constructor
         Array() {
@@ -143,14 +147,23 @@ struct Array {
                 data[i] = T (1);
             }
         }
+        // Fills the array with random numbers generated off a normal distribution
+        inline void randn() const {
+            std::default_random_engine generator;
+            std::normal_distribution<T> distribution(0.0, 1.0);
+            for (int i=0; i<data_size; ++i) {
+                data[i] = distribution(generator);
+            }
+        }
         // Print out array
         friend std::ostream& operator<<<T>(std::ostream& out, const Array array);
 };
 
 template <typename T>
 std::ostream& operator<< (std::ostream &out, const Array<T> array) {
-    for (int i=0; i<array.numdim(); ++i) {
-        out << i << std::endl;
+    T* mydata = array.item();
+    for (int i=0; i<array.size(); ++i) {
+        std::cout << mydata[i] << std::endl;
     }
     return out;
 };

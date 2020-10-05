@@ -5,7 +5,7 @@
 
 int main() {
     Array<double> arr1 = Array<double>(3,3,3,3);
-    arr1.ones();
+    arr1.randn();
     std::cout << arr1 << std::endl;
     arr1.~Array();
     return 0;
