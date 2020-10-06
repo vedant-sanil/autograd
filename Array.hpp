@@ -6,6 +6,8 @@
 #include <iostream>
 #include <exception>
 #include <random>
+#include <string>
+#include <vector>
 
 // Forward declaration
 template <typename T>
@@ -34,6 +36,12 @@ struct Array {
         }
         inline unsigned dimsize(unsigned x) const {
             return dimensions[x];
+        }
+        inline T& operator[](unsigned x) {
+            return data[x];
+        }
+        const inline T& operator[](unsigned x) const {
+            return data[x];
         }
         inline T* item() const {
             return data;
@@ -135,6 +143,14 @@ struct Array {
         inline int size() const {
             return data_size;
         }
+        // Returns dimension array
+        unsigned int* getdimarray() const {
+            return dimensions;
+        }
+        // Return one dimension flattened array 
+        unsigned int* getone_d_dimarray() const {
+            return one_d_dimensions;
+        }
         // Print dimension array 
         inline void print_dims() const {
             for (int i=0; i<num_dimensions; ++i) {
@@ -155,15 +171,49 @@ struct Array {
                 data[i] = distribution(generator);
             }
         }
+        inline void reshape(unsigned x, ...) {
+            unsigned int* new_dimensions = new unsigned int[]
+
+        }
         // Print out array
         friend std::ostream& operator<<<T>(std::ostream& out, const Array array);
 };
 
 template <typename T>
 std::ostream& operator<< (std::ostream &out, const Array<T> array) {
+    // Function to print out an array in similar format
+    // to a numpy array.
     T* mydata = array.item();
-    for (int i=0; i<array.size(); ++i) {
-        std::cout << mydata[i] << std::endl;
+    unsigned int dims = array.numdim();
+    unsigned int first = dims-1;
+    unsigned int* dimarr = array.getdimarray();
+    std::string spaces = "";
+
+    for (int i=0; i<dims-1; ++i) {
+        out << "[";
+        spaces += " ";
+    }
+    for (int i=0; i<array.size(); i += dimarr[dims-1]) {
+        if (i != 0) {
+            out << spaces << "["; 
+        } else {
+            out << "[";
+        }
+        for (int j=i; j<i+dimarr[dims-1]; ++j) {
+            out<<mydata[j];
+            if (j != dimarr[dims-1]+i-1) {
+                out<<",";
+            }
+        }
+        //std::cout << std::endl<< i << " " << std::endl;
+        if (i+dimarr[dims-1] <= array.size()-1) {
+            out << "]"<<","<<std::endl;
+        } else {
+            out << "]";
+        }
+    }
+    for (int i=0; i<dims-1; ++i) {
+        out << "]";
     }
     return out;
 };
