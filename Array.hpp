@@ -54,8 +54,10 @@ struct Array {
             one_d_dimensions = NULL;
             data = NULL;
         }
-        // Constructor for the array
-        // Args: Number of dimensions, < dimension sizes >
+        /** 
+         * Constructor for the array
+         * Args: Number of dimensions, < dimension sizes >
+         */
         Array(unsigned ndim, ...) {
             num_dimensions = ndim;
             if (ndim==0) {
@@ -151,19 +153,26 @@ struct Array {
         unsigned int* getone_d_dimarray() const {
             return one_d_dimensions;
         }
-        // Print dimension array 
+        /** 
+         * Print dimension array
+         */ 
         inline void print_dims() const {
             for (int i=0; i<num_dimensions; ++i) {
                 std::cout << "Dimension number " << i << " and the size is: " << dimensions[i] << std::endl; 
             }
         }
-        // Fills the array with 1
+        /** 
+         * Fills the array with 1s
+         */
         inline void ones() const {
             for (int i=0; i<data_size; ++i) {
                 data[i] = T (1);
             }
         }
-        // Fills the array with random numbers generated off a normal distribution
+        /**
+         * Fills the array with random numbers generated off a normal distribution
+         * with, Mean=0.0, SD=0.1
+         */ 
         inline void randn() const {
             std::default_random_engine generator;
             std::normal_distribution<T> distribution(0.0, 1.0);
@@ -171,9 +180,37 @@ struct Array {
                 data[i] = distribution(generator);
             }
         }
-        inline void reshape(unsigned x, ...) {
-            unsigned int* new_dimensions = new unsigned int[]
+        /**
+         * Reshape the array in place, by changing dimension mapping
+         * of the 1D array to the N-D array
+         * Args: Number of dimensions, < dimension sizes >
+         */
+        inline void reshape(unsigned dims, ...) {
+            unsigned int* new_dimensions = new unsigned int[dims];
+            va_list args;
+            va_start (x, args);
+            unsigned int new_size = 1;
+            for (int i=0; i<dims; ++i) {
+                new_dimensions[i] = va_arg(args, unsigned int);
+                new_size *= new_dimensions[i];
+            }
+            va_end(args);
+            if (new_size != data_size) {
+                std::cerr << "Size mismatch for original array of size: " << data_size << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            delete[] dimensions;
+            delete[] one_d_dimensions;
+            dimensions = NULL;
+            one_d_dimensions = NULL;
+            one_d_dimensions = new unsigned int[dims];
+            memcpy(dimensions, new_dimensions, sizeof(unsigned int) * dims);
 
+            // Set correct multiplicative dimensions for flattening array
+            one_d_dimensions[dims-1] = dimensions[dims-1];
+            for (int a=dims-2; a>=0; --a) {
+                one_d_dimensions[a] = dimensions[a+1] * dimensions[a];
+            }
         }
         // Print out array
         friend std::ostream& operator<<<T>(std::ostream& out, const Array array);
