@@ -7,7 +7,7 @@
 #include <exception>
 #include <random>
 #include <string>
-#include <vector>
+#include <cstring>
 
 // Forward declaration
 template <typename T>
@@ -24,7 +24,7 @@ struct Array {
         unsigned int data_size; // size of data
         unsigned int* dimensions; // array of dimension sizes
         unsigned int* one_d_dimensions; // array of dimensions for one D array
-        T* data; // stores data
+        T *data; // stores data
 
     public:
         unsigned int* shape;
@@ -58,6 +58,7 @@ struct Array {
          * Constructor for the array
          * Args: Number of dimensions, < dimension sizes >
          */
+
         Array(unsigned ndim, ...) {
             num_dimensions = ndim;
             if (ndim==0) {
@@ -75,7 +76,7 @@ struct Array {
                     dimensions[a] = va_arg(args, unsigned int);
                     size*=dimensions[a];
                 }
-                data = new T[size];
+                //data = new T[size];
                 data_size = size;
                 va_end(args);
 
@@ -188,7 +189,7 @@ struct Array {
         inline void reshape(unsigned dims, ...) {
             unsigned int* new_dimensions = new unsigned int[dims];
             va_list args;
-            va_start (x, args);
+            va_start (args, dims);
             unsigned int new_size = 1;
             for (int i=0; i<dims; ++i) {
                 new_dimensions[i] = va_arg(args, unsigned int);
@@ -201,8 +202,10 @@ struct Array {
             }
             delete[] dimensions;
             delete[] one_d_dimensions;
+            num_dimensions = dims;
             dimensions = NULL;
             one_d_dimensions = NULL;
+            dimensions = new unsigned int[dims];
             one_d_dimensions = new unsigned int[dims];
             memcpy(dimensions, new_dimensions, sizeof(unsigned int) * dims);
 
