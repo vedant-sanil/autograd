@@ -10,13 +10,11 @@
 #include <cstring>
 
 // Forward declaration
-template <typename T>
-struct Array;
 
 template <typename T>
 std::ostream& operator<<(std::ostream& out, const Array<T> array);
 
-template<typename T>
+template<typename T, unsigned... dims>
 struct Array {
     // Struct stores my data
     private:
@@ -25,6 +23,33 @@ struct Array {
         unsigned int* dimensions; // array of dimension sizes
         unsigned int* one_d_dimensions; // array of dimensions for one D array
         T *data; // stores data
+
+        void unpack() {
+            int size = 1;
+            int dim_count = 0;
+            auto values = {dims...};
+            for (unsigned s : values) {
+                dim_count++;
+                size *= s;
+            }    
+
+            if (dim_count != 0) {
+                // Populate the multidimensional array dimensions and initialize the array
+                dimensions = new unsigned int[dim_count];
+                int count = 0;
+                for (unsigned s : values) {
+                    dimensions[count] = s;
+                }
+
+                // Initialize array
+                data = new T[size];
+                data_size = size;
+                num_dimensions = dim_count;
+            } else {
+                data = NULL;
+                dimensions = NULL;
+            }
+        }
 
     public:
         unsigned int* shape;
@@ -46,47 +71,13 @@ struct Array {
         inline T* item() const {
             return data;
         }
-        // No argument constructor
-        Array() {
-            num_dimensions = 0;
-            data_size = 0;
-            dimensions = NULL;
-            one_d_dimensions = NULL;
-            data = NULL;
-        }
+        
         /** 
          * Constructor for the array
          * Args: Number of dimensions, < dimension sizes >
          */
-
-        Array(unsigned ndim, ...) {
-            num_dimensions = ndim;
-            if (ndim==0) {
-                dimensions = NULL;
-                one_d_dimensions = NULL;
-                data = NULL;
-                data_size = 0;
-            } else {
-                dimensions = new unsigned int[ndim];
-                one_d_dimensions = new unsigned int[ndim];
-                va_list args;
-                va_start (args, ndim);
-                unsigned size=1;
-                for (int a=0; a<ndim; ++a) {
-                    dimensions[a] = va_arg(args, unsigned int);
-                    size*=dimensions[a];
-                }
-                //data = new T[size];
-                data_size = size;
-                va_end(args);
-
-                // Set correct multiplicative dimensions for flattening array
-                one_d_dimensions[ndim-1] = dimensions[ndim-1];
-                for (int a=ndim-2; a>=0; --a) {
-                    one_d_dimensions[a] = dimensions[a+1] * dimensions[a];
-                }
-            }
-            shape = dimensions;
+        Array() {
+            unpack();
         }
         // Destructor
         ~Array() {

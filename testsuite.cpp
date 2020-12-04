@@ -1,12 +1,29 @@
 #include <iostream>
-#include <cstdarg>
+#include <vector>
 
-#include "Array_new.hpp"
+#include "Array.hpp"
+
+/*
+template<class T, unsigned... dims>
+struct Array {
+    public:
+    std::vector<unsigned> dimesnions;
+    void print_values() {
+        auto values = {dims...};
+        for (auto s : values) {
+            std::cout << s << std::endl;
+        }
+    } 
+        //T *data = new T[5]; 
+
+};
+*/
 
 int main() {
-    Array<double,3,3>::type arr1 = {{1,2,3},{4,5,6},{7,8,9}};
-
-    cout << 
+    Array<double, 3,3> data = Array<double,3,3>();
+    std::cout << data.numdim() << std::endl;
+    std::cout << 
+    //cout << 
     /*
     arr1.randn();
     std::cout << arr1 << std::endl;
