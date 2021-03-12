@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "Array.hpp"
+#include "tensor/array/Array.h"
 
 /*
 template<class T, unsigned... dims>
@@ -20,16 +20,21 @@ struct Array {
 */
 
 int main() {
-    Array<double, 3,3> data = Array<double,3,3>();
-    std::cout << data.numdim() << std::endl;
-    std::cout << 
+    Array<double, 3,3> arr = Array<double,3,3>();
+    arr.randn();
+
+    std::cout << arr[0];
+
+    //arr = {{1,2,3}, {4,5,6}, {7,8,9}};
+    //struct Array arrs = {1,2,3};
+
     //cout << 
     /*
     arr1.randn();
     std::cout << arr1 << std::endl;
     arr1.reshape(2,3,9);
-    std::cout << arr1 << std::endl;
-    arr1.~Array();
     */
+    //std::cout << arr << std::endl;
+    
     return 0;
 }
